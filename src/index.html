@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Photo Syncthesis</title>
+  </head>
+  <body>
+    <div id="notification-container" class="notification-container">
+      <!-- Notifications will be dynamically added here -->
+    </div>
+    <div class="container">
+      <div class="left-pane">
+        <div class="file-tree-header">
+          <h3>File Explorer</h3>
+        </div>
+        <div id="file-tree" class="file-tree">
+          <!-- File tree will be populated here -->
+        </div>
+      </div>
+      <div class="right-pane">
+        <div class="diff-header">
+          <h3>Photo Syncthesis</h3>
+          <!-- Move toggle to the top right corner of the app -->
+          <label class="toggle-switch compact" title="Show only differences">
+            <input type="checkbox" id="diff-only-toggle" checked />
+            <span class="toggle-slider"></span>
+            <span class="toggle-label">Diff</span>
+          </label>
+        </div>
+
+        <!-- Folder Diff Interface -->
+        <div id="diff-container" class="diff-container">
+          <div class="drop-zones">
+            <div class="drop-zone" id="folder1-zone">
+              <div class="drop-zone-content">
+                <div class="drop-icon">📁</div>
+                <div class="drop-text">Drop Folder</div>
+                <div class="folder-path" id="folder1-path"></div>
+              </div>
+              <button class="clear-folder-btn hidden" id="clear-folder1" title="Clear Folder 1">
+                <span class="clear-icon">×</span>
+              </button>
+            </div>
+            <div class="sync-controls">
+              <div class="sync-buttons">
+                <button class="sync-btn" id="sync-left-to-right" title="Copy missing files from Folder 1 to Folder 2">
+                  <span class="sync-arrow">→</span>
+                </button>
+                <button class="sync-btn" id="sync-right-to-left" title="Copy missing files from Folder 2 to Folder 1">
+                  <span class="sync-arrow">←</span>
+                </button>
+              </div>
+            </div>
+            <div class="drop-zone" id="folder2-zone">
+              <div class="drop-zone-content">
+                <div class="drop-icon">📁</div>
+                <div class="drop-text">Drop Folder</div>
+                <div class="folder-path" id="folder2-path"></div>
+              </div>
+              <button class="clear-folder-btn hidden" id="clear-folder2" title="Clear Folder 2">
+                <span class="clear-icon">×</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="dual-tree-container" id="dual-tree-container">
+            <div class="tree-columns">
+              <div class="tree-column">
+                <div class="tree-column-header">
+                  <h4></h4>
+                  <span class="folder-name" id="folder1-name"></span>
+                </div>
+                <div class="tree-view" id="folder1-tree">
+                  <!-- Folder 1 tree structure -->
+                </div>
+              </div>
+
+              <div class="tree-column">
+                <div class="tree-column-header">
+                  <h4></h4>
+                  <span class="folder-name" id="folder2-name"></span>
+                </div>
+                <div class="tree-view" id="folder2-tree">
+                  <!-- Folder 2 tree structure -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirmation Dialog -->
+    <div id="sync-confirmation-overlay" class="confirmation-overlay hidden">
+      <div class="confirmation-dialog">
+        <div class="confirmation-header">
+          <h3>Confirm Sync Operation</h3>
+          <button class="confirmation-close" id="sync-confirm-close">×</button>
+        </div>
+        <div class="confirmation-body">
+          <div class="sync-direction">
+            <div class="sync-source">
+              <div class="sync-label">From:</div>
+              <div class="sync-folder-name" id="sync-source-name"></div>
+              <div class="sync-folder-path" id="sync-source-path"></div>
+            </div>
+            <div class="sync-arrow-container">
+              <span class="dialog-arrow" id="sync-direction-arrow">→</span>
+            </div>
+            <div class="sync-destination">
+              <div class="sync-label">To:</div>
+              <div class="sync-folder-name" id="sync-dest-name"></div>
+              <div class="sync-folder-path" id="sync-dest-path"></div>
+            </div>
+          </div>
+          <div class="sync-warning">
+            <p>
+              Missing files and folders will be copied from the source to the destination folder. This operation is
+              irreversible.
+            </p>
+          </div>
+        </div>
+        <div class="confirmation-actions">
+          <button class="btn-cancel" id="sync-confirm-cancel">Cancel</button>
+          <button class="btn-confirm" id="sync-confirm-proceed">Proceed with Sync</button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
