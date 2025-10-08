@@ -184,6 +184,10 @@ ipcMain.handle('compare-folders', async (event, folder1Path: string, folder2Path
   return FileSystemService.compareFolderStructures(folder1Structure, folder2Structure);
 });
 
+ipcMain.handle('compare-nway-folders', async (event, folders: { path: string; structure: FileItem[] }[]) => {
+  return FileSystemService.compareNWayFolderStructures(folders);
+});
+
 ipcMain.handle('sync-folders-left-to-right', async (event, folder1Path: string, folder2Path: string) => {
   try {
     const [folder1Structure, folder2Structure] = await Promise.all([

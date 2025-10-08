@@ -30,60 +30,42 @@
 
         <!-- Folder Diff Interface -->
         <div id="diff-container" class="diff-container">
-          <div class="drop-zones">
-            <div class="drop-zone" id="folder1-zone">
-              <div class="drop-zone-content">
-                <div class="drop-icon">📁</div>
-                <div class="drop-text">Drop Folder</div>
-                <div class="folder-path" id="folder1-path"></div>
-              </div>
-              <button class="clear-folder-btn hidden" id="clear-folder1" title="Clear Folder 1">
-                <span class="clear-icon">×</span>
-              </button>
-            </div>
-            <div class="sync-controls">
-              <div class="sync-buttons">
-                <button class="sync-btn" id="sync-left-to-right" title="Copy missing files from Folder 1 to Folder 2">
-                  <span class="sync-arrow">→</span>
+          <div class="folder-controls">
+            <div class="folder-controls-header">
+              <h4>Folders to Compare</h4>
+              <div class="folder-controls-buttons">
+                <button class="remove-folder-header-btn hidden" id="remove-folder-btn" title="Remove a folder">
+                  <span class="remove-icon">−</span>
                 </button>
-                <button class="sync-btn" id="sync-right-to-left" title="Copy missing files from Folder 2 to Folder 1">
-                  <span class="sync-arrow">←</span>
+                <button
+                  class="repair-btn hidden"
+                  id="repair-btn"
+                  title="Repair folders - Fix corrupted/missing files using majority consensus (3+ folders required)"
+                >
+                  <span class="repair-icon">🔧</span>
+                  <span class="repair-text">Repair</span>
+                </button>
+                <button class="add-folder-btn" id="add-folder-btn" title="Add another folder">
+                  <span class="add-icon">+</span>
                 </button>
               </div>
             </div>
-            <div class="drop-zone" id="folder2-zone">
-              <div class="drop-zone-content">
-                <div class="drop-icon">📁</div>
-                <div class="drop-text">Drop Folder</div>
-                <div class="folder-path" id="folder2-path"></div>
-              </div>
-              <button class="clear-folder-btn hidden" id="clear-folder2" title="Clear Folder 2">
-                <span class="clear-icon">×</span>
-              </button>
+            <div class="drop-zones" id="drop-zones-container">
+              <!-- Folder drop zones will be dynamically added here -->
             </div>
           </div>
 
-          <div class="dual-tree-container" id="dual-tree-container">
-            <div class="tree-columns">
-              <div class="tree-column">
-                <div class="tree-column-header">
-                  <h4></h4>
-                  <span class="folder-name" id="folder1-name"></span>
-                </div>
-                <div class="tree-view" id="folder1-tree">
-                  <!-- Folder 1 tree structure -->
-                </div>
+          <div class="sync-controls-container">
+            <div class="sync-controls">
+              <div class="sync-buttons" id="sync-buttons-container">
+                <!-- Sync buttons will be dynamically added here -->
               </div>
+            </div>
+          </div>
 
-              <div class="tree-column">
-                <div class="tree-column-header">
-                  <h4></h4>
-                  <span class="folder-name" id="folder2-name"></span>
-                </div>
-                <div class="tree-view" id="folder2-tree">
-                  <!-- Folder 2 tree structure -->
-                </div>
-              </div>
+          <div class="nway-tree-container" id="nway-tree-container">
+            <div class="tree-columns" id="tree-columns-container">
+              <!-- Tree columns will be dynamically added here -->
             </div>
           </div>
         </div>

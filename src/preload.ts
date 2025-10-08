@@ -23,8 +23,10 @@ interface FolderComparisonResult {
   name: string;
   path: string;
   type: 'file' | 'directory';
-  status: 'removed' | 'added' | 'common';
+  status: 'removed' | 'added' | 'common' | 'modified' | 'majority' | 'minority';
   children?: FolderComparisonResult[];
+  presentInFolders?: number[];
+  majorityStatus?: 'majority' | 'minority';
 }
 
 // Interface for sync result
@@ -54,6 +56,10 @@ contextBridge.exposeInMainWorld('fileSystemAPI', {
   compareFolders: (folder1Path: string, folder2Path: string): Promise<FolderComparisonResult[]> =>
     ipcRenderer.invoke('compare-folders', folder1Path, folder2Path),
 
+  // Compare n-way folders
+  compareNWayFolders: (folders: { path: string; structure: FileItem[] }[]): Promise<FolderComparisonResult[]> =>
+    ipcRenderer.invoke('compare-nway-folders', folders),
+
   // Sync folders: copy missing files from folder1 to folder2
   syncFoldersLeftToRight: (folder1Path: string, folder2Path: string): Promise<SyncResult> =>
     ipcRenderer.invoke('sync-folders-left-to-right', folder1Path, folder2Path),
@@ -72,6 +78,7 @@ declare global {
       checkPath: (dirPath: string) => Promise<PathCheckResult>;
       scanDirectoryRecursive: (dirPath: string) => Promise<FileItem[]>;
       compareFolders: (folder1Path: string, folder2Path: string) => Promise<FolderComparisonResult[]>;
+      compareNWayFolders: (folders: { path: string; structure: FileItem[] }[]) => Promise<FolderComparisonResult[]>;
       syncFoldersLeftToRight: (folder1Path: string, folder2Path: string) => Promise<SyncResult>;
       syncFoldersRightToLeft: (folder1Path: string, folder2Path: string) => Promise<SyncResult>;
     };

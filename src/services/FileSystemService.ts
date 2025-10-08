@@ -179,6 +179,119 @@ export class FileSystemService {
     return this.sortComparisonItems(result);
   }
 
+  static compareNWayFolderStructures(folders: { path: string; structure: FileItem[] }[]): FolderComparisonResult[] {
+    if (folders.length < 2) {
+      throw new Error('At least 2 folders are required for comparison');
+    }
+
+    // Create maps for each folder
+    const folderMaps: Map<string, FileItem>[] = [];
+
+    folders.forEach((folder, _index) => {
+      const folderMap = new Map<string, FileItem>();
+      const addToMap = (items: FileItem[], map: Map<string, FileItem>, prefix = '') => {
+        items.forEach(item => {
+          const fullPath = prefix ? path.join(prefix, item.name) : item.name;
+          map.set(fullPath, item);
+          if (item.children) addToMap(item.children, map, fullPath);
+        });
+      };
+      addToMap(folder.structure, folderMap);
+      folderMaps.push(folderMap);
+    });
+
+    // Get all unique paths across all folders
+    const allPaths = new Set<string>();
+    folderMaps.forEach(map => {
+      for (const path of map.keys()) {
+        allPaths.add(path);
+      }
+    });
+
+    const result: FolderComparisonResult[] = [];
+    const resultMap = new Map<string, FolderComparisonResult>();
+
+    for (const fullPath of allPaths) {
+      const itemsInFolders: (FileItem | undefined)[] = folderMaps.map(map => map.get(fullPath));
+      const presentInFolders: number[] = [];
+      const items: FileItem[] = [];
+
+      // Find which folders contain this item
+      itemsInFolders.forEach((item, index) => {
+        if (item) {
+          presentInFolders.push(index);
+          items.push(item);
+        }
+      });
+
+      if (items.length === 0) continue;
+
+      // Determine majority/minority status
+      const totalFolders = folders.length;
+      const presentCount = presentInFolders.length;
+      const isMajority = presentCount > totalFolders / 2;
+
+      let status: 'removed' | 'added' | 'common' | 'modified' | 'majority' | 'minority';
+      let majorityStatus: 'majority' | 'minority' | undefined;
+
+      if (presentCount === totalFolders) {
+        // Present in all folders - check if identical
+        const firstItem = items[0];
+        const allIdentical = items.every(item => {
+          if (item.type !== firstItem.type) return false;
+          if (item.type === 'file' && firstItem.checksum && item.checksum) {
+            return ChecksumService.compareFileChecksums(firstItem, item) === 'identical';
+          } else if (item.type === 'directory' && firstItem.checksum && item.checksum) {
+            return ChecksumService.compareFolderChecksums(firstItem, item) === 'identical';
+          }
+          return true; // Default to identical if no checksums
+        });
+
+        status = allIdentical ? 'common' : 'modified';
+      } else {
+        // Not present in all folders
+        if (isMajority) {
+          status = 'majority';
+          majorityStatus = 'majority';
+        } else {
+          status = 'minority';
+          majorityStatus = 'minority';
+        }
+      }
+
+      const comparisonItem: FolderComparisonResult = {
+        name: items[0].name,
+        path: items[0].path,
+        type: items[0].type,
+        status: status,
+        children: [],
+        checksum: items[0].checksum,
+        checksumData: items[0].checksumData,
+        presentInFolders: presentInFolders,
+        majorityStatus: majorityStatus,
+      };
+
+      resultMap.set(fullPath, comparisonItem);
+    }
+
+    // Build hierarchy
+    for (const [fullPath, item] of resultMap) {
+      const parentPath = path.dirname(fullPath);
+
+      if (parentPath === '.' || parentPath === '') {
+        result.push(item);
+      } else {
+        const parent = resultMap.get(parentPath);
+        if (parent) {
+          if (!parent.children) parent.children = [];
+          parent.children.push(item);
+        }
+      }
+    }
+
+    return this.sortComparisonItems(result);
+  }
+
   static async copyFileWithDirectories(srcPath: string, destPath: string): Promise<void> {
     const destDir = path.dirname(destPath);
     await mkdir(destDir, { recursive: true });

@@ -1,8 +1,8 @@
 import './index.css';
 import { FileTreeManager } from './components/FileTreeManager';
-import { FolderComparisonManager } from './components/FolderComparisonManager';
+import { NWayFolderComparisonManager } from './components/NWayFolderComparisonManager';
 
 document.addEventListener('DOMContentLoaded', () => {
   new FileTreeManager();
-  new FolderComparisonManager();
+  new NWayFolderComparisonManager();
 });

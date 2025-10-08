@@ -15,7 +15,7 @@ export interface FolderComparisonResult {
   name: string;
   path: string;
   type: 'file' | 'directory';
-  status: 'removed' | 'added' | 'common' | 'modified';
+  status: 'removed' | 'added' | 'common' | 'modified' | 'majority' | 'minority';
   children?: FolderComparisonResult[];
   checksum?: string;
   checksumData?: {
@@ -23,6 +23,10 @@ export interface FolderComparisonResult {
     contentChecksum?: string;
     lastModified?: number;
   };
+  // For n-way diff: track which folders contain this item
+  presentInFolders?: number[];
+  // For n-way diff: track majority/minority status
+  majorityStatus?: 'majority' | 'minority';
 }
 
 export interface SyncResult {
@@ -45,7 +49,7 @@ export interface DualTreeNode {
   element: HTMLElement;
   childrenContainer?: HTMLElement;
   isExpanded: boolean;
-  status: 'removed' | 'added' | 'common' | 'missing' | 'modified';
+  status: 'removed' | 'added' | 'common' | 'missing' | 'modified' | 'majority' | 'minority';
 }
 
 export interface NotificationOptions {
@@ -54,4 +58,25 @@ export interface NotificationOptions {
   message?: string;
   duration?: number;
   autoHide?: boolean;
+}
+
+export interface FolderInfo {
+  path: string;
+  name: string;
+  structure: FileItem[] | null;
+}
+
+export interface NWayComparisonResult {
+  folders: FolderInfo[];
+  comparison: FolderComparisonResult[];
+}
+
+export interface RepairItem {
+  name: string;
+  path: string;
+  type: 'file' | 'directory';
+  action: 'copy' | 'replace';
+  majorityFolders: number[];
+  minorityFolders: number[];
+  sourceFolderIndex: number; // Index of folder to copy from
 }

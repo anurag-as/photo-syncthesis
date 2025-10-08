@@ -195,6 +195,150 @@ describe('FileSystemService', () => {
     });
   });
 
+  describe('compareNWayFolderStructures', () => {
+    it('should compare multiple folder structures and return n-way differences', () => {
+      const folders = [
+        {
+          path: '/folder1',
+          structure: [
+            { name: 'common.txt', path: 'common.txt', type: 'file' as const },
+            { name: 'in12.txt', path: 'in12.txt', type: 'file' as const },
+            { name: 'only1.txt', path: 'only1.txt', type: 'file' as const },
+          ],
+        },
+        {
+          path: '/folder2',
+          structure: [
+            { name: 'common.txt', path: 'common.txt', type: 'file' as const },
+            { name: 'in12.txt', path: 'in12.txt', type: 'file' as const },
+            { name: 'only2.txt', path: 'only2.txt', type: 'file' as const },
+          ],
+        },
+        {
+          path: '/folder3',
+          structure: [
+            { name: 'common.txt', path: 'common.txt', type: 'file' as const },
+            { name: 'only3.txt', path: 'only3.txt', type: 'file' as const },
+          ],
+        },
+      ];
+
+      const result = FileSystemService.compareNWayFolderStructures(folders);
+
+      expect(result).toHaveLength(5);
+
+      const commonFile = result.find(item => item.name === 'common.txt');
+      const in12File = result.find(item => item.name === 'in12.txt');
+      const only1File = result.find(item => item.name === 'only1.txt');
+      const only2File = result.find(item => item.name === 'only2.txt');
+      const only3File = result.find(item => item.name === 'only3.txt');
+
+      expect(commonFile?.status).toBe('common');
+      expect(commonFile?.presentInFolders).toEqual([0, 1, 2]);
+
+      expect(in12File?.status).toBe('majority');
+      expect(in12File?.presentInFolders).toEqual([0, 1]);
+
+      expect(only1File?.status).toBe('minority');
+      expect(only1File?.presentInFolders).toEqual([0]);
+
+      expect(only2File?.status).toBe('minority');
+      expect(only2File?.presentInFolders).toEqual([1]);
+
+      expect(only3File?.status).toBe('minority');
+      expect(only3File?.presentInFolders).toEqual([2]);
+    });
+
+    it('should throw error when less than 2 folders provided', () => {
+      const folders = [
+        {
+          path: '/folder1',
+          structure: [{ name: 'file.txt', path: 'file.txt', type: 'file' as const }],
+        },
+      ];
+
+      expect(() => FileSystemService.compareNWayFolderStructures(folders)).toThrow(
+        'At least 2 folders are required for comparison'
+      );
+    });
+
+    it('should handle nested folder structures in n-way comparison', () => {
+      const folders = [
+        {
+          path: '/folder1',
+          structure: [
+            {
+              name: 'dir1',
+              path: 'dir1',
+              type: 'directory' as const,
+              children: [{ name: 'nested1.txt', path: 'dir1/nested1.txt', type: 'file' as const }],
+            },
+          ],
+        },
+        {
+          path: '/folder2',
+          structure: [
+            {
+              name: 'dir1',
+              path: 'dir1',
+              type: 'directory' as const,
+              children: [{ name: 'nested2.txt', path: 'dir1/nested2.txt', type: 'file' as const }],
+            },
+          ],
+        },
+      ];
+
+      const result = FileSystemService.compareNWayFolderStructures(folders);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe('dir1');
+      expect(result[0].children).toHaveLength(2);
+
+      const nested1File = result[0].children?.find(item => item.name === 'nested1.txt');
+      const nested2File = result[0].children?.find(item => item.name === 'nested2.txt');
+
+      expect(nested1File?.status).toBe('minority');
+      expect(nested1File?.presentInFolders).toEqual([0]);
+
+      expect(nested2File?.status).toBe('minority');
+      expect(nested2File?.presentInFolders).toEqual([1]);
+    });
+
+    it('should detect majority vs minority correctly with 4 folders', () => {
+      const folders = [
+        {
+          path: '/folder1',
+          structure: [{ name: 'majority.txt', path: 'majority.txt', type: 'file' as const }],
+        },
+        {
+          path: '/folder2',
+          structure: [{ name: 'majority.txt', path: 'majority.txt', type: 'file' as const }],
+        },
+        {
+          path: '/folder3',
+          structure: [{ name: 'majority.txt', path: 'majority.txt', type: 'file' as const }],
+        },
+        {
+          path: '/folder4',
+          structure: [{ name: 'minority.txt', path: 'minority.txt', type: 'file' as const }],
+        },
+      ];
+
+      const result = FileSystemService.compareNWayFolderStructures(folders);
+
+      expect(result).toHaveLength(2);
+
+      const majorityFile = result.find(item => item.name === 'majority.txt');
+      const minorityFile = result.find(item => item.name === 'minority.txt');
+
+      expect(majorityFile?.status).toBe('majority');
+      expect(majorityFile?.presentInFolders).toEqual([0, 1, 2]);
+
+      expect(minorityFile?.status).toBe('minority');
+      expect(minorityFile?.presentInFolders).toEqual([3]);
+    });
+  });
+
   describe('copyFileWithDirectories', () => {
     it('should create directories and copy file', async () => {
       // Mock the method directly
